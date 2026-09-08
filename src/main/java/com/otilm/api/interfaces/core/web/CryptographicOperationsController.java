@@ -17,9 +17,7 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -55,7 +53,14 @@ public interface CryptographicOperationsController extends AuthProtectedControll
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved")})
+            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Validation failed or the key algorithm is unsupported",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "501",
+                    description = "Legacy attribute discovery is not supported for v2 providers; use the "
+                            + "operation-specific attribute endpoints.",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(
             path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/cipher/{algorithm}/attributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,7 +81,10 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @ApiResponse(responseCode = "502", description = "Connector Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/encrypt/attributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listEncryptAttributes(
@@ -95,9 +103,9 @@ public interface CryptographicOperationsController extends AuthProtectedControll
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/encrypt",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     EncryptDataResponseDto encryptData(
@@ -116,7 +124,10 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @ApiResponse(responseCode = "502", description = "Connector Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/decrypt/attributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listDecryptAttributes(
@@ -135,9 +146,9 @@ public interface CryptographicOperationsController extends AuthProtectedControll
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/decrypt",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     DecryptDataResponseDto decryptData(
@@ -166,7 +177,14 @@ public interface CryptographicOperationsController extends AuthProtectedControll
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved")})
+            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "501",
+                    description = "Legacy attribute discovery is not supported for v2 providers; use the "
+                            + "operation-specific attribute endpoints.",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(
             path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/signature/{algorithm}/attributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -187,7 +205,10 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @ApiResponse(responseCode = "502", description = "Connector Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/sign/attributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listSignAttributes(
@@ -206,9 +227,9 @@ public interface CryptographicOperationsController extends AuthProtectedControll
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/sign",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     SignDataResponseDto signData(@Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
@@ -226,7 +247,10 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @ApiResponse(responseCode = "502", description = "Connector Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/verify/attributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listVerifyAttributes(
@@ -245,9 +269,9 @@ public interface CryptographicOperationsController extends AuthProtectedControll
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/verify",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     VerifyDataResponseDto verifyData(
@@ -269,7 +293,10 @@ public interface CryptographicOperationsController extends AuthProtectedControll
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved")})
+            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/random/attributes", produces = {"application/json"})
     List<BaseAttribute> listRandomAttributes(
             @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid)
@@ -284,9 +311,9 @@ public interface CryptographicOperationsController extends AuthProtectedControll
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/random", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     RandomDataResponseDto randomData(
