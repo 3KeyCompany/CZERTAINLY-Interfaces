@@ -165,6 +165,24 @@ public interface CryptographicKeyController extends AuthProtectedController {
     // Create and Update Operation
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
+    @Operation(summary = "List supported key creation types",
+            description = "Returns the key request types supported for the specified token profile, based on its "
+                    + "token configuration, profile attributes and selected key usages")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Supported key creation types retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles/{tokenProfileUuid}/keys/types",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<KeyRequestType> listSupportedKeyRequestTypes(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid)
+            throws NotFoundException, ConnectorException;
+
     @Operation(summary = "Create a new Cryptographic Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "502", description = "Connector Error",
