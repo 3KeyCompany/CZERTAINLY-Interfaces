@@ -15,11 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The verdict provenance block is served only once a rule set has evaluated the asset, and core keeps that state
- * reachable by design: a row waits between its upsert and its first evaluation, and a failed evaluation or verdict
- * write leaves it on the sweep's work list until the next run. The contract therefore has to say the block can be
- * absent — the schema must not require it, and the wire omits it rather than sending null. The row-level
- * {@code pqcVerdict} is the member that always carries a value.
+ * The verdict provenance block is served only once a rule set has evaluated the asset, and core keeps a row without it
+ * reachable by design: a row waits between its upsert and its first evaluation, and a row whose first verdict write
+ * failed or was refused by the row-version guard stays on the sweep's work list until the next run (a failed
+ * evaluation, by contrast, is stamped UNKNOWN / EVALUATION-FAILED and does carry a block). The contract therefore has
+ * to say the block can be absent — the schema must not require it, and the wire omits it rather than sending null. The
+ * row-level {@code pqcVerdict} is the member that always carries a value.
  */
 class CryptographicAssetVerdictAbsenceContractTest {
 
