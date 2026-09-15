@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
+import com.otilm.api.model.core.acme.AcmeIdentifierType;
 import com.otilm.api.model.core.acme.AcmePreauthorizedIdentifierDto;
 import com.otilm.api.model.core.acme.AcmeProfileDto;
 import jakarta.validation.ConstraintViolation;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -118,7 +120,6 @@ class AcmeProfileIdentifierPolicyTest {
         orChallenge.setIdentifierAuthorizationMode(AcmeIdentifierAuthorizationMode.PREAUTHORIZED_OR_CHALLENGE);
 
         assertTrue(orChallenge.isPreauthorizedOnlyBackedByEntries());
-        // A profile that names neither, which is every profile that exists before this ships.
         assertTrue(new AcmeProfileRequestDto().isPreauthorizedOnlyBackedByEntries());
     }
 
@@ -136,6 +137,44 @@ class AcmeProfileIdentifierPolicyTest {
 
         assertTrue(paths.contains("preauthorizedIdentifiers[0].value"), "@Valid must cascade into the entries");
         assertTrue(paths.contains("preauthorizedIdentifiers[0].matchType"));
+        assertTrue(paths.contains("preauthorizedIdentifiers[0].type"), "an entry without a type covers nothing");
+    }
+
+    @Test
+    void theTypeTravelsAsItsCodeAndIsWhatDistinguishesADottedValue() throws Exception {
+        AcmePreauthorizedIdentifierDto address = entry(AcmeIdentifierType.IP, "192.0.2.1",
+                AcmeIdentifierMatchType.EXACT);
+
+        String json = mapper.writeValueAsString(address);
+
+        assertTrue(json.contains("\"type\":\"ip\""));
+        assertFalse(json.contains("\"IP\""));
+        assertEquals(AcmeIdentifierType.IP, mapper.readValue(json, AcmePreauthorizedIdentifierDto.class).getType());
+        assertNotEquals(address, entry(AcmeIdentifierType.DNS, "192.0.2.1", AcmeIdentifierMatchType.EXACT),
+                "the same value under a different type is a different entry");
+    }
+
+    @Test
+    void anAddressEntryCannotDescendOrWildcard() {
+        AcmePreauthorizedIdentifierDto subdomain = entry(AcmeIdentifierType.IP, "192.0.2.1",
+                AcmeIdentifierMatchType.SUBDOMAIN);
+        AcmePreauthorizedIdentifierDto wildcarded = entry(AcmeIdentifierType.IP, "192.0.2.1",
+                AcmeIdentifierMatchType.EXACT);
+        wildcarded.setAllowWildcard(true);
+
+        assertFalse(subdomain.isAddressEntryMatchedExactly(), "an address has no hierarchy to descend");
+        assertFalse(wildcarded.isAddressEntryMatchedExactly(), "and no wildcard form");
+        assertFalse(VALIDATOR.validate(subdomain).isEmpty(), "the constraint must surface as a violation");
+        assertTrue(entry(AcmeIdentifierType.IP, "192.0.2.1", AcmeIdentifierMatchType.EXACT)
+                .isAddressEntryMatchedExactly());
+        assertTrue(entry("apps.example.com", AcmeIdentifierMatchType.SUBDOMAIN).isAddressEntryMatchedExactly(),
+                "a DNS entry is untouched by the rule");
+    }
+
+    @Test
+    void theConstraintGetterOfAnEntryDoesNotReachTheWire() throws Exception {
+        assertFalse(
+                mapper.writeValueAsString(new AcmePreauthorizedIdentifierDto()).contains("addressEntryMatchedExactly"));
     }
 
     @Test
@@ -156,7 +195,13 @@ class AcmeProfileIdentifierPolicyTest {
     }
 
     private static AcmePreauthorizedIdentifierDto entry(String value, AcmeIdentifierMatchType matchType) {
+        return entry(AcmeIdentifierType.DNS, value, matchType);
+    }
+
+    private static AcmePreauthorizedIdentifierDto entry(AcmeIdentifierType type, String value,
+            AcmeIdentifierMatchType matchType) {
         AcmePreauthorizedIdentifierDto dto = new AcmePreauthorizedIdentifierDto();
+        dto.setType(type);
         dto.setValue(value);
         dto.setMatchType(matchType);
         return dto;
