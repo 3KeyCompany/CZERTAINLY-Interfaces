@@ -42,7 +42,7 @@ public interface CryptographicOperationsController extends AuthProtectedControll
      * @deprecated Use {@link #listEncryptAttributes(String, String, String, String)} or
      * {@link #listDecryptAttributes(String, String, String, String)} for operation-specific attributes.
      */
-    @Deprecated(since = "2.20.0", forRemoval = false)
+    @Deprecated(since = "2.20.0", forRemoval = true)
     @Operation(summary = "List of cipher Attributes", deprecated = true,
             description = "Legacy attribute discovery for v1 providers only. Use listEncryptAttributes or "
                     + "listDecryptAttributes instead. Not supported for v2 providers.")
