@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -55,6 +56,13 @@ public class AcmeProfileRequestDto {
     @Valid
     private ProtocolCertificateAssociationsRequestDto certificateAssociations;
 
+    @Schema(description = "UUIDs of the secrets holding the External Account Binding HMAC keys accepted by this "
+            + "ACME Profile. Each secret's UUID is the kid an ACME client binds a new Account with, and its "
+            + "content is the base64url-encoded key. Supplying at least one makes External Account Binding "
+            + "mandatory - the directory meta then advertises externalAccountRequired; an empty list leaves "
+            + "Account registration open.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<@NotNull UUID> eabSecretUuids = new ArrayList<>();
+
     @Valid
     @Schema(description = "Identifiers an account may obtain from this profile without proving control of them. "
             + "An order whose identifiers are all covered is ready at creation and carries no challenges.",
@@ -85,6 +93,7 @@ public class AcmeProfileRequestDto {
                 .append("requireContact", requireContact)
                 .append("requireTermsOfService", requireTermsOfService)
                 .append("customAttributes", customAttributes)
+                .append("eabSecretUuids", eabSecretUuids)
                 .append("preauthorizedIdentifiers", preauthorizedIdentifiers)
                 .append("identifierAuthorizationMode", identifierAuthorizationMode)
                 .toString();

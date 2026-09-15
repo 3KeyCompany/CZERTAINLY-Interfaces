@@ -7,6 +7,7 @@ import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -58,6 +59,12 @@ public class AcmeProfileDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ProtocolCertificateAssociationsDto certificateAssociations;
 
+    @Schema(description = "UUIDs of the secrets holding the External Account Binding HMAC keys accepted by this "
+            + "ACME Profile. Each UUID is a kid an ACME client may bind a new Account with. A non-empty list "
+            + "makes External Account Binding mandatory - the directory meta then advertises "
+            + "externalAccountRequired.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<UUID> eabSecretUuids = new ArrayList<>();
+
     @Schema(description = "Identifiers an account may obtain from this profile without proving control of them.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<AcmePreauthorizedIdentifierDto> preauthorizedIdentifiers = new ArrayList<>();
@@ -86,6 +93,7 @@ public class AcmeProfileDto extends NameAndUuidDto {
                 .append("issueCertificateAttributes", issueCertificateAttributes)
                 .append("revokeCertificateAttributes", revokeCertificateAttributes)
                 .append("customAttributes", customAttributes)
+                .append("eabSecretUuids", eabSecretUuids)
                 .append("preauthorizedIdentifiers", preauthorizedIdentifiers)
                 .append("identifierAuthorizationMode", identifierAuthorizationMode)
                 .toString();
