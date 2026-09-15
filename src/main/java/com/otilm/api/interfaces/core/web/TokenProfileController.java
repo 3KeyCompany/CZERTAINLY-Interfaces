@@ -64,6 +64,21 @@ public interface TokenProfileController extends AuthProtectedController {
             @Parameter(description = "Token instance UUID") @PathVariable String tokenInstanceUuid)
             throws ConnectorException, NotFoundException;
 
+    @Operation(summary = "List Token Profile Attributes")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token Profile Attributes retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token Instance not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
+    @GetMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles/attributes",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<BaseAttribute> listTokenProfileAttributes(
+            @Parameter(description = "Token instance UUID") @PathVariable String tokenInstanceUuid)
+            throws ConnectorException, NotFoundException;
+
     @Operation(summary = "Details of Token Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Token Profile details retrieved"),
